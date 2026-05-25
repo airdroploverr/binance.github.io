@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Do you love me?</title>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-4CVX29BL1J"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-4CVX29BL1J');
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -199,6 +207,7 @@
     window.addEventListener('load', () => setTimeout(placeNoBtnInitially, 300));
 
     function runAway() {
+      gtag('event', 'try_no', { event_category: 'button', event_label: 'No attempt' });
       placeNoBtnInitially();
       const margin = 80;
       const btnW = noBtn.offsetWidth;
@@ -216,6 +225,7 @@
 
     // --- Yes button ---
     function onYes() {
+      gtag('event', 'click_yes', { event_category: 'button', event_label: 'Yes' });
       document.getElementById('msg').style.display = 'block';
       noBtn.style.display = 'none';
       document.getElementById('yesBtn').textContent = '💖 Yes! 💖';
