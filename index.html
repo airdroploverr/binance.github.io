@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Do you love me?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #fff0f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Nunito', sans-serif;
+      overflow: hidden;
+    }
+
+    /* floating hearts background */
+    .hearts-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .heart-float {
+      position: absolute;
+      font-size: 1.5rem;
+      animation: floatUp linear infinite;
+      opacity: 0.15;
+    }
+
+    @keyframes floatUp {
+      0%   { transform: translateY(110vh) rotate(-10deg); opacity: 0.1; }
+      50%  { opacity: 0.2; }
+      100% { transform: translateY(-10vh) rotate(10deg); opacity: 0; }
+    }
+
+    /* card */
+    .card {
+      position: relative;
+      z-index: 1;
+      background: white;
+      border-radius: 32px;
+      padding: 56px 64px;
+      box-shadow: 0 20px 60px rgba(255, 80, 120, 0.15);
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .emoji {
+      font-size: 3.5rem;
+      display: block;
+      margin-bottom: 16px;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.12); }
+    }
+
+    h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 2rem;
+      color: #e8245c;
+      margin-bottom: 40px;
+      line-height: 1.3;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      align-items: center;
+      min-height: 60px;
+    }
+
+    button {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 14px 36px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    #yesBtn {
+      background: linear-gradient(135deg, #ff6b9d, #e8245c);
+      color: white;
+      box-shadow: 0 6px 20px rgba(232, 36, 92, 0.35);
+    }
+
+    #yesBtn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 10px 28px rgba(232, 36, 92, 0.45);
+    }
+
+    #noBtn {
+      background: #f0f0f0;
+      color: #888;
+      position: fixed; /* so it can move anywhere on screen */
+      transition: none;
+    }
+
+    #noBtn:hover {
+      background: #e8e8e8;
+    }
+
+    /* success state */
+    .message {
+      display: none;
+      margin-top: 28px;
+      font-size: 1.2rem;
+      color: #e8245c;
+      font-weight: 700;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .confetti-piece {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      pointer-events: none;
+      animation: confettiFall 1.2s ease-in forwards;
+      z-index: 999;
+    }
+
+    @keyframes confettiFall {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(60vh) rotate(720deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- floating hearts -->
+  <div class="hearts-bg" id="heartsBg"></div>
+
+  <div class="card" id="card">
+    <span class="emoji">💖</span>
+    <h1>Do you love me?</h1>
+    <div class="buttons">
+      <button id="yesBtn" onclick="onYes()">Yes 💕</button>
+      <button id="noBtn" onmouseenter="runAway()" ontouchstart="runAway()">No</button>
+    </div>
+    <div class="message" id="msg">Yayyy! I knew it! 🥰🎉</div>
+  </div>
+
+  <script>
+    // --- floating hearts background ---
+    const bg = document.getElementById('heartsBg');
+    const heartEmojis = ['❤️','💖','💗','💓','💕','🌸','✨'];
+    for (let i = 0; i < 18; i++) {
+      const el = document.createElement('div');
+      el.className = 'heart-float';
+      el.textContent = heartEmojis[i % heartEmojis.length];
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.animationDuration = (6 + Math.random() * 8) + 's';
+      el.style.animationDelay = (Math.random() * 8) + 's';
+      el.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+      bg.appendChild(el);
+    }
+
+    // --- No button runs away ---
+    const noBtn = document.getElementById('noBtn');
+    let noBtnPlaced = false;
+
+    function placeNoBtnInitially() {
+      if (noBtnPlaced) return;
+      noBtnPlaced = true;
+      // position it roughly where it visually sits beside Yes
+      const yesBtn = document.getElementById('yesBtn');
+      const rect = yesBtn.getBoundingClientRect();
+      noBtn.style.left = (rect.right + 20) + 'px';
+      noBtn.style.top  = rect.top + 'px';
+    }
+
+    // Place No button on first interaction
+    document.addEventListener('mousemove', placeNoBtnInitially, { once: true });
+    document.addEventListener('touchstart', placeNoBtnInitially, { once: true });
+    window.addEventListener('load', () => setTimeout(placeNoBtnInitially, 300));
+
+    function runAway() {
+      placeNoBtnInitially();
+      const margin = 80;
+      const btnW = noBtn.offsetWidth;
+      const btnH = noBtn.offsetHeight;
+
+      const maxX = window.innerWidth  - btnW - margin;
+      const maxY = window.innerHeight - btnH - margin;
+
+      const newX = margin + Math.random() * maxX;
+      const newY = margin + Math.random() * maxY;
+
+      noBtn.style.left = newX + 'px';
+      noBtn.style.top  = newY + 'px';
+    }
+
+    // --- Yes button ---
+    function onYes() {
+      document.getElementById('msg').style.display = 'block';
+      noBtn.style.display = 'none';
+      document.getElementById('yesBtn').textContent = '💖 Yes! 💖';
+      launchConfetti();
+    }
+
+    function launchConfetti() {
+      const colors = ['#ff6b9d','#e8245c','#ffb3cc','#ff85b3','#ffd6e7','#fff'];
+      for (let i = 0; i < 60; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.left = (20 + Math.random() * 60) + 'vw';
+        piece.style.top  = (Math.random() * 30) + 'vh';
+        piece.style.animationDelay = (Math.random() * 0.5) + 's';
+        piece.style.width  = (8 + Math.random() * 8) + 'px';
+        piece.style.height = (8 + Math.random() * 8) + 'px';
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 1800);
+      }
+    }
+  </script>
+</body>
+</html>
